@@ -59,23 +59,23 @@ class MSCI:
 
     def get_issuers(self, params=None):
         url = self.BASE_URL + "issuers"
-        return self.request("get", url, params=params).json()["result"]
+        return self.request("get", url, params=params).json()
 
     def get_issuers_history(self, data):
         url = self.BASE_URL + "issuers/history"
-        return self.request("post", url, data=data).json()["result"]
+        return self.request("post", url, data=data).json()
 
     def get_funds(self, params=None):
         url = self.BASE_URL + "funds"
-        return self.request("get", url, params=params).json()["result"]
+        return self.request("get", url, params=params).json()
 
     def get_funds_history(self, data):
         url = self.BASE_URL + "funds/history"
-        return self.request("post", url, data=data).json()["result"]
+        return self.request("post", url, data=data).json()
 
     def get_factors(self):
         url = self.BASE_URL + "metadata/factors"
-        return self.request("get", url).json()["result"]
+        return self.request("get", url).json()
 
     def get_coverages(self):
         url = self.BASE_URL + "parameterValues/coverages"
