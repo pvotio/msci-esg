@@ -1,6 +1,10 @@
 from decouple import config
 
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
+CLIENT_ID = config("CLIENT_ID")
+CLIENT_SECRET = config("CLIENT_SECRET")
+ISSUER_FIELDS = config("ISSUER_FIELDS")
+FUND_FIELDS = config("FUND_FIELDS")
 INSERTER_MAX_RETRIES = config("INSERTER_MAX_RETRIES", default=3, cast=int)
 REQUEST_MAX_RETRIES = config("REQUEST_MAX_RETRIES", default=3, cast=int)
 REQUEST_BACKOFF_FACTOR = config("REQUEST_BACKOFF_FACTOR", default=2, cast=int)

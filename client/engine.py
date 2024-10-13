@@ -1,9 +1,10 @@
-import traceback
 import concurrent.futures
+import time
+import traceback
 
 from client import MSCI
 from config import logger
-from client.fields import FUND_FIELDS, ISSUER_FIELDS
+from config.settings import FUND_FIELDS, ISSUER_FIELDS
 
 
 class Engine:
@@ -20,17 +21,16 @@ class Engine:
         self.is_funds_running = True
 
     def run(self):
-        logger.info("Starting engine...")
         self.msci.login()
-        logger.info("Login successful.")
+        logger.info("Login successful")
         self.coverages = self.msci.get_coverages()
         logger.info(f"Retrieved coverages: {self.coverages}")
         functions = [
             self.get_issuers,
-            self.get_issuers_history,
-            self.get_funds,
-            self.get_funds_history,
-            self.get_instruments_history,
+            # self.get_issuers_history,
+            # self.get_funds,
+            # self.get_funds_history,
+            # self.get_instruments_history,
         ]
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -65,6 +65,7 @@ class Engine:
                     )
 
         self.is_issuers_running = False
+        logger.info("Finished fetching issuers")
 
     def _get_issuers(self, params, coverage):
         cursor = 0
@@ -79,20 +80,17 @@ class Engine:
                 else:
                     total_count = len(issuers_data)
 
-            logger.info(
-                f"{coverage} progress: {len(self.issuers[coverage])}/{total_count}"
-            )
-
             self.issuers[coverage].extend(issuers_data)
             cursor += params["limit"]
             if cursor >= total_count:
-                logger.info(f"Finished fetching issuers for {coverage}.")
+                logger.info(f"Finished fetching issuers for {coverage}")
                 break
 
         return
 
     def get_issuers_history(self):
-        pass
+        while self.is_issuers_running:
+            time.sleep(1)
 
     def get_funds(self):
         logger.info("Fetching funds")
@@ -114,13 +112,14 @@ class Engine:
             self.funds.extend(funds_data)
             cursor += params["limit"]
             if cursor >= total_count:
-                logger.info("Finished fetching funds.")
+                logger.info("Finished fetching funds")
                 break
 
         self.is_funds_running = False
 
     def get_funds_history(self):
-        pass
+        while self.is_funds_running:
+            time.sleep(1)
 
     def get_instruments_history(self):
         pass
