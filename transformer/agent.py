@@ -36,8 +36,48 @@ def transform_funds(data):
     return df
 
 
+def transform_instrument_history(data):
+    if not data:
+        return None
+
+    result = []
+
+    for isnt in data:
+        base_row = {
+            "instrument": isnt["requested_id"],
+            "instrument_type": isnt.get("instrument_type", ""),
+        }
+        for factor in isnt["factors"]:
+            name = factor["name"]
+            values = factor["data_values"]
+            for value in values:
+                sub_row = {
+                    **base_row,
+                    "factor": name,
+                    "value": value["value"],
+                    "date": value["as_of_date"],
+                }
+                result.append(sub_row)
+
+    df = pd.DataFrame(result)
+    df_pivot = df.pivot_table(
+        index=["instrument", "instrument_type", "date"],
+        columns="factor",
+        values="value",
+        aggfunc="first",
+    ).reset_index()
+    df_pivot.columns.name = None
+    df_pivot.columns = df_pivot.columns.tolist()
+    df_pivot = df_pivot.sort_values(by=["instrument", "date"])
+    df_pivot["timestamp_created_utc"] = datetime.datetime.utcnow()
+    return df_pivot
+
+
 def transform(engine):
     return {
         "etl.msci_issuer": transform_issuers(engine.issuers),
         "etl.msci_funds": transform_funds(engine.funds),
+        "etl.msci_instrument_history": transform_instrument_history(
+            engine.instruments_history
+        ),
     }

@@ -73,6 +73,10 @@ class MSCI:
         url = self.BASE_URL + "funds/history"
         return self.request("post", url, data=data).json()
 
+    def get_instruments_history(self, data):
+        url = self.BASE_URL + "instruments/history"
+        return self.request("post", url, data=data).json()
+
     def get_factors(self):
         url = self.BASE_URL + "metadata/factors"
         return self.request("get", url).json()
