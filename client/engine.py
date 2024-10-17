@@ -4,9 +4,7 @@ import json
 import traceback
 
 from client import MSCI
-from config import logger
-from config.settings import (FUND_FIELDS, INSTRUMENT_FIELDS,
-                             INSTRUMENT_TIMEDELTA_DAYS, ISSUER_FIELDS)
+from config import logger, settings
 from database.helper import fetch_isins
 
 
@@ -132,7 +130,7 @@ class Engine:
 
     def get_instruments_history(self):
         logger.info(
-            f"Fetching instrument history for last {INSTRUMENT_TIMEDELTA_DAYS} days"
+            f"Fetching instrument history for last {settings.INSTRUMENT_TIMEDELTA_DAYS} days"
         )
 
         for i in range(0, len(self.db_isins), 100):
@@ -143,8 +141,8 @@ class Engine:
     def _get_instruments_history(self, batch_isin):
         data = {
             "instrument_identifier_list": batch_isin,
-            "factor_name_list": INSTRUMENT_FIELDS.split(","),
-            "start_date": self.time_delta_date(INSTRUMENT_TIMEDELTA_DAYS),
+            "factor_name_list": settings.INSTRUMENT_FIELDS.split(","),
+            "start_date": self.time_delta_date(settings.INSTRUMENT_TIMEDELTA_DAYS),
             "end_date": self.today_date(),
             "data_sample_frequency": "business_month_end",
             "data_layout": "by_factor",
@@ -157,14 +155,14 @@ class Engine:
     def get_issuers_params(coverage):
         return {
             "coverage": coverage,
-            "factor_name_list": ISSUER_FIELDS,
+            "factor_name_list": settings.ISSUER_FIELDS,
             "limit": 1000,
         }
 
     @staticmethod
     def get_funds_params():
         return {
-            "factor_name_list": FUND_FIELDS,
+            "factor_name_list": settings.FUND_FIELDS,
             "limit": 10000,
         }
 

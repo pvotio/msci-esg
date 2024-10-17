@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from config.settings import APP_ID, FUND_FIELDS, ISSUER_FIELDS
+from config import settings
 
 
 def transform_issuers(data):
@@ -14,7 +14,7 @@ def transform_issuers(data):
         records.extend([{**row, "COVERAGE": coverage} for row in v])
 
     df = pd.DataFrame(records)
-    columns = [*ISSUER_FIELDS.split(","), "COVERAGE"]
+    columns = [*settings.ISSUER_FIELDS.split(","), "COVERAGE"]
     df = df[columns]
     df["timestamp_created_utc"] = datetime.datetime.utcnow()
     df.drop_duplicates(
@@ -29,12 +29,12 @@ def transform_funds(data):
         return None
 
     df = pd.DataFrame(data)
-    df = df[FUND_FIELDS.split(",")]
+    df = df[settings.FUND_FIELDS.split(",")]
     df["timestamp_created_utc"] = datetime.datetime.utcnow()
     return df
 
 
-def transform_instrument_history(data):
+def transform_instruments_history(data):
     if not data:
         return None
 
@@ -72,18 +72,40 @@ def transform_instrument_history(data):
     return df_pivot
 
 
+def transform_issuers_history(data):
+    pass
+
+
+def transform_funds_history(data):
+    pass
+
+
 def transform(engine):
     APP_ID_MAP = {
         "LIVE": {
-            "etl.msci_issuer": (transform_issuers, engine.issuers),
-            "etl.msci_funds": (transform_funds, engine.funds),
+            "ISSUER_TABLE": (transform_issuers, engine.issuers),
+            "FUND_TABLE": (transform_funds, engine.funds),
         },
         "INST_HIST": {
-            "etl.msci_instrument_history": (
-                transform_instrument_history,
+            "INSTRUMENT_HISTORY_TABLE": (
+                transform_instruments_history,
                 engine.instruments_history,
+            )
+        },
+        "ISSU_HIST": {
+            "ISSUER_HISTORY_TABLE": (
+                transform_issuers_history,
+                engine.issuers_history,
+            )
+        },
+        "FUND_HIST": {
+            "FUND_HISTORY_TABLE": (
+                transform_funds_history,
+                engine.funds_history,
             )
         },
     }
 
-    return {k: f(a) for k, (f, a) in APP_ID_MAP[APP_ID].items()}
+    return {
+        getattr(settings, k): f(a) for k, (f, a) in APP_ID_MAP[settings.APP_ID].items()
+    }
