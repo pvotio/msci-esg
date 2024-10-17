@@ -48,7 +48,7 @@ class Engine:
             for future in concurrent.futures.as_completed(futures):
                 try:
                     future.result()
-                except Exception as e:
+                except Exception:
                     logger.error(
                         f"Error occurred during execution: {traceback.format_exc()}"
                     )
@@ -69,9 +69,9 @@ class Engine:
             for future in concurrent.futures.as_completed(futures):
                 try:
                     future.result()
-                except Exception as e:
+                except Exception:
                     logger.error(
-                        f"Error occurred during issuer fetching: {traceback.format_exc()}"
+                        f"Error occurred during issuer fetching: {traceback.format_exc()}"  # noqa: E501
                     )
 
         logger.info("Finished fetching issuers")
@@ -130,11 +130,11 @@ class Engine:
 
     def get_instruments_history(self):
         logger.info(
-            f"Fetching instrument history for last {settings.INSTRUMENT_TIMEDELTA_DAYS} days"
+            f"Fetching instrument history for last {settings.INSTRUMENT_TIMEDELTA_DAYS} days"  # noqa: E501
         )
 
         for i in range(0, len(self.db_isins), 100):
-            self._get_instruments_history(self.db_isins[i : i + 100])
+            self._get_instruments_history(self.db_isins[i: i + 100])
 
         logger.info("Finished fetching instrument history")
 
