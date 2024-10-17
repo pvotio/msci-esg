@@ -5,18 +5,25 @@ import traceback
 
 from client import MSCI
 from config import logger
-from config.settings import (
-    FUND_FIELDS,
-    INSTRUMENT_FIELDS,
-    ISSUER_FIELDS,
-    INSTRUMENT_TIMEDELTA_DAYS,
-)
+from config.settings import (FUND_FIELDS, INSTRUMENT_FIELDS,
+                             INSTRUMENT_TIMEDELTA_DAYS, ISSUER_FIELDS)
 from database.helper import fetch_isins
 
 
 class Engine:
 
-    def __init__(self, client_id, client_secret, db_instance):
+    APP_ID_MAP = {
+        "LIVE": ["get_issuers", "get_funds"],
+        "INST_HIST": ["get_instruments_history"],
+        "FUND_HIST": ["get_funds_history"],
+        "ISSU_HIST": ["get_issuers_history"],
+    }
+
+    def __init__(self, app_id, client_id, client_secret, db_instance):
+        if app_id not in self.APP_ID_MAP:
+            raise ValueError(f"Invalid value for APP_ID: {app_id}")
+
+        self.app_id = app_id
         self.msci = MSCI(client_id, client_secret)
         self.db_instance = db_instance
         self.coverages = []
@@ -28,18 +35,15 @@ class Engine:
 
     def run(self):
         self.msci.login()
+        logger.info(f"APP MODE: {self.app_id}")
         logger.info("Login successful")
-        self.db_isins = fetch_isins(self.db_instance)
-        logger.info(f"Retrieved ISINs from database: {len(self.db_isins)}")
-        self.coverages = self.msci.get_coverages()
-        logger.info(f"Retrieved coverages: {self.coverages}")
-        functions = [
-            self.get_issuers,
-            self.get_issuers_history,
-            self.get_funds,
-            self.get_funds_history,
-            self.get_instruments_history,
-        ]
+        functions = [getattr(self, attr) for attr in self.APP_ID_MAP[self.app_id]]
+        if self.app_id == "LIVE":
+            self.coverages = self.msci.get_coverages()
+            logger.info(f"Retrieved coverages: {self.coverages}")
+        else:
+            self.db_isins = fetch_isins(self.db_instance)
+            logger.info(f"Retrieved ISINs from database: {len(self.db_isins)}")
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(func) for func in functions]
@@ -113,7 +117,9 @@ class Engine:
                 else:
                     total_count = len(funds_data)
 
-            logger.info(f"FUNDS progress: {len(self.funds)} / {total_count}")
+            progress = int(len(self.funds) / total_count * 100)
+            if progress % 5 == 0:
+                logger.info(f"Funds Progress: {progress}%")
 
             self.funds.extend(funds_data)
             cursor += params["limit"]
@@ -128,20 +134,9 @@ class Engine:
         logger.info(
             f"Fetching instrument history for last {INSTRUMENT_TIMEDELTA_DAYS} days"
         )
-        with concurrent.futures.ThreadPoolExecutor() as executer:
-            futures = [
-                executer.submit(
-                    self._get_instruments_history, self.db_isins[i : i + 100]
-                )
-                for i in range(0, len(self.db_isins), 100)
-            ]
-            for future in concurrent.futures.as_completed(futures):
-                try:
-                    future.result()
-                except Exception as e:
-                    logger.error(
-                        f"Error occurred during instrument fetching: {traceback.format_exc()}"
-                    )
+
+        for i in range(0, len(self.db_isins), 100):
+            self._get_instruments_history(self.db_isins[i : i + 100])
 
         logger.info("Finished fetching instrument history")
 

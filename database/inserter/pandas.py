@@ -16,7 +16,9 @@ class PandasSQLDataInserter(DataInserter):
         super().__init__(db_connection)
         self.max_retries = max_retries
 
-    def insert(self, df: pd.DataFrame, table_name: str) -> None:
+    def insert(
+        self, df: pd.DataFrame, table_name: str, if_exists: str = "replace"
+    ) -> None:
         self.delete_rows(table_name=table_name)
         schema, name = table_name.split(".")
         if self.db_connection.engine is None:
@@ -28,7 +30,7 @@ class PandasSQLDataInserter(DataInserter):
                     schema=schema,
                     name=name,
                     con=self.db_connection.engine,
-                    if_exists="append",
+                    if_exists=if_exists,
                     index=False,
                 )
                 logger.info(f"Inserted {len(df)} rows into {table_name} table")

@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from config.settings import FUND_FIELDS, ISSUER_FIELDS
+from config.settings import APP_ID, FUND_FIELDS, ISSUER_FIELDS
 
 
 def transform_issuers(data):
@@ -15,7 +15,6 @@ def transform_issuers(data):
 
     df = pd.DataFrame(records)
     columns = [*ISSUER_FIELDS.split(","), "COVERAGE"]
-    df = df.loc[:, ~df.columns.duplicated()]
     df = df[columns]
     df["timestamp_created_utc"] = datetime.datetime.utcnow()
     df.drop_duplicates(
@@ -31,7 +30,6 @@ def transform_funds(data):
 
     df = pd.DataFrame(data)
     df = df[FUND_FIELDS.split(",")]
-    df = df.loc[:, ~df.columns.duplicated()]
     df["timestamp_created_utc"] = datetime.datetime.utcnow()
     return df
 
@@ -66,6 +64,7 @@ def transform_instrument_history(data):
         values="value",
         aggfunc="first",
     ).reset_index()
+
     df_pivot.columns.name = None
     df_pivot.columns = df_pivot.columns.tolist()
     df_pivot = df_pivot.sort_values(by=["instrument", "date"])
@@ -74,10 +73,17 @@ def transform_instrument_history(data):
 
 
 def transform(engine):
-    return {
-        "etl.msci_issuer": transform_issuers(engine.issuers),
-        "etl.msci_funds": transform_funds(engine.funds),
-        "etl.msci_instrument_history": transform_instrument_history(
-            engine.instruments_history
-        ),
+    APP_ID_MAP = {
+        "LIVE": {
+            "etl.msci_issuer": (transform_issuers, engine.issuers),
+            "etl.msci_funds": (transform_funds, engine.funds),
+        },
+        "INST_HIST": {
+            "etl.msci_instrument_history": (
+                transform_instrument_history,
+                engine.instruments_history,
+            )
+        },
     }
+
+    return {k: f(a) for k, (f, a) in APP_ID_MAP[APP_ID].items()}

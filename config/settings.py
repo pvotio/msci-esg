@@ -1,11 +1,14 @@
 from decouple import config
 
+APP_ID = config("APP_ID", default="LIVE")
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 CLIENT_ID = config("CLIENT_ID")
 CLIENT_SECRET = config("CLIENT_SECRET")
 ISSUER_FIELDS = config("ISSUER_FIELDS")
 FUND_FIELDS = config("FUND_FIELDS")
 INSTRUMENT_FIELDS = config("INSTRUMENT_FIELDS")
+ISSUER_TIMEDELTA_DAYS = config("ISSUER_TIMEDELTA_DAYS", default=180, cast=int)
+FUND_TIMEDELTA_DAYS = config("FUND_TIMEDELTA_DAYS", default=180, cast=int)
 INSTRUMENT_TIMEDELTA_DAYS = config("INSTRUMENT_TIMEDELTA_DAYS", default=180, cast=int)
 INSERTER_MAX_RETRIES = config("INSERTER_MAX_RETRIES", default=3, cast=int)
 REQUEST_MAX_RETRIES = config("REQUEST_MAX_RETRIES", default=3, cast=int)
