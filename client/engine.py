@@ -116,7 +116,7 @@ class Engine:
                     total_count = len(funds_data)
 
             progress = int(len(self.funds) / total_count * 100)
-            if progress % 5 == 0:
+            if not progress % 5:
                 logger.info(f"Funds Progress: {progress}%")
 
             self.funds.extend(funds_data)
@@ -130,13 +130,27 @@ class Engine:
 
     def get_instruments_history(self):
         logger.info(
-            f"Fetching instrument history for last {settings.INSTRUMENT_TIMEDELTA_DAYS} days"  # noqa: E501
+            f"Fetching instruments history for last {settings.INSTRUMENT_TIMEDELTA_DAYS} days"  # noqa: E501
         )
 
         for i in range(0, len(self.db_isins), 100):
-            self._get_instruments_history(self.db_isins[i: i + 100])
+            try:
+                self._get_instruments_history(self.db_isins[i : i + 100])
+            except Exception:
+                logger.error(f"self.db_isins[{i} : {i} + 100] {traceback.format_exc()}")
+                continue
 
-        logger.info("Finished fetching instrument history")
+            progress = round(
+                i / len(self.db_isins) * 100, 2
+            )
+            if not progress * 100 % 5:
+                logger.info(f"Instruments Progress: {progress}%")
+
+        notfetched_isins_count = len(self.db_isins) - len(self.instruments_history)
+        if notfetched_isins_count:
+            logger.warning(f"{notfetched_isins_count} ISINs were not returned by API.")
+        
+        logger.info("Finished fetching instruments history")
 
     def _get_instruments_history(self, batch_isin):
         data = {
@@ -148,7 +162,6 @@ class Engine:
             "data_layout": "by_factor",
         }
         data = self.msci.get_instruments_history(json.dumps(data))["result"]["data"]
-        logger.info(f"Fetched {len(data)} instrument(s)")
         self.instruments_history.extend(data)
 
     @staticmethod

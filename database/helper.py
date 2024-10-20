@@ -13,7 +13,7 @@ def create_inserter_objects(db_connection) -> PandasSQLDataInserter:
 
 
 def fetch_isins(db_connection) -> list[str]:
-    query = settings.DB_ISIN_QUERY 
+    query = settings.DB_ISIN_QUERY
     if db_connection.engine is None:
         db_connection.connect()
 
