@@ -13,12 +13,7 @@ def create_inserter_objects(db_connection) -> PandasSQLDataInserter:
 
 
 def fetch_isins(db_connection) -> list[str]:
-    query = """
-    SELECT distinct isin FROM etl.extall_index_components
-    WHERE isin IS NOT NULL
-    UNION
-    SELECT distinct isin FROM md.securities
-    """
+    query = settings.DB_ISIN_QUERY 
     if db_connection.engine is None:
         db_connection.connect()
 

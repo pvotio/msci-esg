@@ -18,6 +18,7 @@ if APP_ID == "INST_HIST":
         "INSTRUMENT_TIMEDELTA_DAYS", default=180, cast=int
     )
     INSTRUMENT_HISTORY_TABLE = config("INSTRUMENT_HISTORY_TABLE")
+    DB_ISIN_QUERY = config("DB_ISIN_QUERY")
 elif APP_ID == "LIVE":
     ISSUER_FIELDS = config("ISSUER_FIELDS")
     FUND_FIELDS = config("FUND_FIELDS")
@@ -27,7 +28,9 @@ elif APP_ID == "FUND_HIST":
     FUND_HISTORY_TABLE = config("FUND_HISTORY_TABLE")
     FUND_FIELDS = config("FUND_FIELDS")
     FUND_TIMEDELTA_DAYS = config("FUND_TIMEDELTA_DAYS", default=180, cast=int)
+    DB_ISIN_QUERY = config("DB_ISIN_QUERY")
 elif APP_ID == "ISSU_HIST":
     ISSUER_HISTORY_TABLE = config("ISSUER_HISTORY_TABLE")
     ISSUER_FIELDS = config("ISSUER_FIELDS")
     ISSUER_TIMEDELTA_DAYS = config("ISSUER_TIMEDELTA_DAYS", default=180, cast=int)
+    DB_ISIN_QUERY = config("DB_ISIN_QUERY")
