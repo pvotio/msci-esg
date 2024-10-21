@@ -13,8 +13,6 @@ class Engine:
     APP_ID_MAP = {
         "LIVE": ["get_issuers", "get_funds"],
         "INST_HIST": ["get_instruments_history"],
-        "FUND_HIST": ["get_funds_history"],
-        "ISSU_HIST": ["get_issuers_history"],
     }
 
     def __init__(self, app_id, client_id, client_secret, db_instance):
@@ -97,9 +95,6 @@ class Engine:
 
         return
 
-    def get_issuers_history(self):
-        pass
-
     def get_funds(self):
         logger.info("Fetching funds")
         params = self.get_funds_params()
@@ -125,9 +120,6 @@ class Engine:
                 logger.info("Finished fetching funds")
                 break
 
-    def get_funds_history(self):
-        pass
-
     def get_instruments_history(self):
         logger.info(
             f"Fetching instruments history for last {settings.INSTRUMENT_TIMEDELTA_DAYS} days"  # noqa: E501
@@ -140,16 +132,14 @@ class Engine:
                 logger.error(f"self.db_isins[{i} : {i} + 100] {traceback.format_exc()}")
                 continue
 
-            progress = round(
-                i / len(self.db_isins) * 100, 2
-            )
+            progress = round(i / len(self.db_isins) * 100, 2)
             if not progress * 100 % 5:
                 logger.info(f"Instruments Progress: {progress}%")
 
         notfetched_isins_count = len(self.db_isins) - len(self.instruments_history)
         if notfetched_isins_count:
             logger.warning(f"{notfetched_isins_count} ISINs were not returned by API.")
-        
+
         logger.info("Finished fetching instruments history")
 
     def _get_instruments_history(self, batch_isin):

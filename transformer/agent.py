@@ -72,14 +72,6 @@ def transform_instruments_history(data):
     return df_pivot
 
 
-def transform_issuers_history(data):
-    pass
-
-
-def transform_funds_history(data):
-    pass
-
-
 def transform(engine):
     APP_ID_MAP = {
         "LIVE": {
@@ -90,18 +82,6 @@ def transform(engine):
             "INSTRUMENT_HISTORY_TABLE": (
                 transform_instruments_history,
                 engine.instruments_history,
-            )
-        },
-        "ISSU_HIST": {
-            "ISSUER_HISTORY_TABLE": (
-                transform_issuers_history,
-                engine.issuers_history,
-            )
-        },
-        "FUND_HIST": {
-            "FUND_HISTORY_TABLE": (
-                transform_funds_history,
-                engine.funds_history,
             )
         },
     }
