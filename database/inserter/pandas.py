@@ -17,7 +17,7 @@ class PandasSQLDataInserter(DataInserter):
         self.max_retries = max_retries
 
     def insert(
-        self, df: pd.DataFrame, table_name: str, if_exists: str = "replace"
+        self, df: pd.DataFrame, table_name: str, if_exists: str = "append"
     ) -> None:
         self.delete_rows(table_name=table_name)
         schema, name = table_name.split(".")
