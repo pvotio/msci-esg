@@ -127,7 +127,7 @@ class Engine:
 
         for i in range(0, len(self.db_isins), 100):
             try:
-                self._get_instruments_history(self.db_isins[i : i + 100])
+                self._get_instruments_history(self.db_isins[i: i + 100])
             except Exception:
                 logger.error(f"self.db_isins[{i} : {i} + 100] {traceback.format_exc()}")
                 continue
