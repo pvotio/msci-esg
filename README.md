@@ -21,8 +21,8 @@ This project provides a client application to interact with the MSCI API for ret
 
 ## Project Structur
 
-- client/ - Scraper engine and API client
-- config/ - Logger and app settings
-- database/ - Database connections and data insertion
-- transformer/ - Data transformation logic
-- main.py - Application entry point
+- `client/` - Scraper engine and API client
+- `config/` - Logger and app settings
+- `database/` - Database connections and data insertion
+- `transformer/` - Data transformation logic
+- `main.py` - Application entry point
