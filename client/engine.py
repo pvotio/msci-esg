@@ -15,13 +15,12 @@ class Engine:
         "INST_HIST": ["get_instruments_history"],
     }
 
-    def __init__(self, app_id, client_id, client_secret, db_instance):
+    def __init__(self, app_id, client_id, client_secret):
         if app_id not in self.APP_ID_MAP:
             raise ValueError(f"Invalid value for APP_ID: {app_id}")
 
         self.app_id = app_id
         self.msci = MSCI(client_id, client_secret)
-        self.db_instance = db_instance
         self.coverages = []
         self.issuers = {}
         self.issuers_history = []
@@ -38,7 +37,7 @@ class Engine:
             self.coverages = self.msci.get_coverages()
             logger.info(f"Retrieved coverages: {self.coverages}")
         else:
-            self.db_isins = fetch_isins(self.db_instance)
+            self.db_isins = fetch_isins()
             logger.info(f"Retrieved ISINs from database: {len(self.db_isins)}")
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -127,7 +126,7 @@ class Engine:
 
         for i in range(0, len(self.db_isins), 100):
             try:
-                self._get_instruments_history(self.db_isins[i: i + 100])
+                self._get_instruments_history(self.db_isins[i : i + 100])
             except Exception:
                 logger.error(f"self.db_isins[{i} : {i} + 100] {traceback.format_exc()}")
                 continue

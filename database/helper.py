@@ -1,23 +1,35 @@
 from sqlalchemy import text
 
 from config import settings
-from database import PandasSQLDataInserter
+from database import MSSQLDatabaseConnection, PandasSQLDataInserter
 
 
-def create_inserter_objects(db_connection) -> PandasSQLDataInserter:
+def create_inserter_objects() -> PandasSQLDataInserter:
+    db_instance = MSSQLDatabaseConnection(
+        settings.MSSQL_SERVER,
+        settings.MSSQL_DATABASE,
+        settings.MSSQL_USERNAME,
+        settings.MSSQL_PASSWORD,
+    )
     data_inserter = PandasSQLDataInserter(
-        db_connection, max_retries=settings.INSERTER_MAX_RETRIES
+        db_instance, max_retries=settings.INSERTER_MAX_RETRIES
     )
 
     return data_inserter
 
 
-def fetch_isins(db_connection) -> list[str]:
+def fetch_isins() -> list[str]:
+    db_instance = MSSQLDatabaseConnection(
+        settings.MSSQL_SERVER,
+        settings.MSSQL_DATABASE,
+        settings.MSSQL_USERNAME,
+        settings.MSSQL_PASSWORD,
+    )
     query = settings.DB_ISIN_QUERY
-    if db_connection.engine is None:
-        db_connection.connect()
+    if db_instance.engine is None:
+        db_instance.connect()
 
-    with db_connection.engine.connect() as connection:
+    with db_instance.engine.connect() as connection:
         result = connection.execute(text(query))
         isins = [row[0] for row in result]
 

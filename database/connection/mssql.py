@@ -9,6 +9,6 @@ class MSSQLDatabaseConnection(DatabaseConnection):
     ) -> None:
         cnx_string = (
             f"mssql+pyodbc://{username}:{password}@"
-            f"{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server"
+            f"{server}/{database}?driver=ODBC+Driver+18+for+SQL+Server"
         )
         super().__init__(cnx_string)
