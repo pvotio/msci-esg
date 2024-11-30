@@ -14,3 +14,5 @@ SQLAlchemy==2.0.35
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
+azure-identity==1.19.0
+fast-to-sql==2.3.0
